@@ -15,29 +15,43 @@ if len(sys.argv) != 2 :
 
 print ""
 
-opath = os.path.join ( sys.argv[1], "Contents" )
-opath = os.path.join ( opath, "Resources" )
-opath = os.path.join ( opath, "share" )
+opath1 = os.path.join ( sys.argv[1], "Contents" )
+opath1 = os.path.join ( opath1, "Resources" )
+opath1 = os.path.join ( opath1, "share" )
 
-if os.path.isdir( opath ) :
-    opath = os.path.join ( opath, "modelz" )
+opath2 = os.path.join ( sys.argv[1], "share" )
+
+didInstall = False
+
+for opath in [opath1, opath2] :
 
     if os.path.isdir( opath ) :
-        print " - removing previous ModelZ:", opath
-        shutil.rmtree(opath)
+        opath = os.path.join ( opath, "modelz" )
     
-    print " - copying from:", os.getcwd()
-    print " - copying to:", opath
-
-    try :
-        shutil.copytree ( os.getcwd(), opath )  
-    except :
-        print "Could not copy to:", opath
-        print " 1. please check if you have write access"
-        print " 2. try with sudo python install.py <path to Chimera>"
-        print ""
+        if os.path.isdir( opath ) :
+            print " - removing previous ModelZ:", opath
+            try :
+                shutil.rmtree(opath)
+            except :
+                pass
         
+        #print " - copying from:", os.getcwd()
+        print " - copying . ->", opath
     
+        try :
+            shutil.copytree ( os.getcwd(), opath )  
+            didInstall = True
+        except :
+            print "Could not copy to:", opath
+            print " 1. please check if you have write access"
+            print " 2. try with sudo python install.py <path to Chimera>"
+            print ""
+            break
+            
+        didInstall = True
+
+if didInstall :            
+
     print ""
     print "Installation complete."
     print ""

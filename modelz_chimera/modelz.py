@@ -994,7 +994,7 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
         else :
             for r in self.seqRes :
                 try :
-                    #blah
+                    blah
                     ra = r.scZ
                 except :
                     doRes.append ( r )

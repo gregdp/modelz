@@ -11,7 +11,5 @@ To Install:
 
 
 
-\* On Windows, you may use the Chimera python, e.g.:
-
-6. [path to Chimera]/bin/python install.py [path to Chimera]
+\* On Windows, you may use the Chimera python, e.g. [path to Chimera]/bin/python install.py [path to Chimera]
 

@@ -168,7 +168,7 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             l.grid(column=0, row=0, sticky='w')
 
             self.dmap = Tkinter.StringVar(parent)
-            self.dmapMB  = Tkinter.Menubutton ( ff, textvariable=self.dmap, relief=Tkinter.RAISED, width=15 )
+            self.dmapMB  = Tkinter.Menubutton ( ff, textvariable=self.dmap, relief=Tkinter.RAISED, width=20 )
             self.dmapMB.grid (column=1, row=0, sticky='we', padx=5)
             self.dmapMB.menu  =  Tkinter.Menu ( self.dmapMB, tearoff=0, postcommand=self.MapMenu )
             self.dmapMB["menu"]  =  self.dmapMB.menu
@@ -181,7 +181,7 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             l.grid(column=2, row=0, sticky='w')
 
             self.struc = Tkinter.StringVar(parent)
-            self.strucMB  = Tkinter.Menubutton ( ff, textvariable=self.struc, relief=Tkinter.RAISED, width=15 )
+            self.strucMB  = Tkinter.Menubutton ( ff, textvariable=self.struc, relief=Tkinter.RAISED, width=20 )
             self.strucMB.grid (column=3, row=0, sticky='we', padx=5)
             self.strucMB.menu  =  Tkinter.Menu ( self.strucMB, tearoff=0, postcommand=self.StrucMenu )
             self.strucMB["menu"]  =  self.strucMB.menu
@@ -220,10 +220,6 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
 
             #b = Tkinter.Button(ff, text="SSE", command=self.SSE)
             #b.grid (column=9, row=0, sticky='w', padx=5)
-
-            b = Tkinter.Button(ff, text="Calculate Z-Scores", command=self.CalcZScores)
-            b.grid (column=10, row=0, sticky='w', padx=5)
-
 
             if 1 :
                 oft = Hybrid.Checkbutton(ff, 'Ribbon', True)
@@ -289,6 +285,9 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             ff.grid(column=0, row=row, sticky='w', pady=0, padx=5)
             
             
+            b = Tkinter.Button(ff, text="Calculate Z-Scores", command=self.CalcZScores )
+            b.grid (column=10, row=0, sticky='w', padx=5)
+
             self.colorMod = Tkinter.StringVar()
             self.colorMod.set ( 'sc' )
             
@@ -305,11 +304,14 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             c.grid (column=23, row=0, sticky='w')
 
 
+            l = Tkinter.Label(ff, text='     ', fg="#000")
+            l.grid(column=25, row=0, sticky='ens')
+
 
             ff = Tkinter.Frame(ff, borderwidth=1, padx=2, pady=2, relief=Tkinter.GROOVE)
-            ff.grid(column=30, row=0, sticky='w', pady=0, padx=5)
+            ff.grid(column=30, row=0, sticky='e', pady=0, padx=5)
 
-            l = Tkinter.Label(ff, text='   Selection (Ctrl+Click+Drag on Sequence) - Show:', fg="#000")
+            l = Tkinter.Label(ff, text='   Select (Ctrl+Click+Drag On Sequence) Show:', fg="#000")
             l.grid(column=35, row=0, sticky='ens')
 
             oft = Hybrid.Checkbutton(ff, 'Ribbon', True)
@@ -322,7 +324,7 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             self.showAtoms = oft.variable
             #self.showRibbon.set ( 1 )
 
-            oft = Hybrid.Checkbutton(ff, 'Mesh', True)
+            oft = Hybrid.Checkbutton(ff, 'Mesh', False)
             oft.button.grid(column = 38, row = 0, sticky = 'w')
             self.showMesh = oft.variable
             #self.showRibbon.set ( 1 )

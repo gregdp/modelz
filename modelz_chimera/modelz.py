@@ -820,7 +820,6 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
 
 
 
-
     def RemoveSeq  (self) :
         
         if self.seq == "" :
@@ -856,6 +855,7 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             del self.seqText
             
         self.seqSel = None
+        self.seq = ""
         self.UpdateSeqSel ()
 
 
@@ -951,6 +951,27 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
         scoreI = 0
 
         status ( "Getting secondary structure elements..." )
+
+        ok = True
+        try :
+            print self.cur_dmap.name
+        except :
+            status ( "Selected map not found; please choose another map" )
+            self.dmap.set ("")
+            ok = False
+            
+        try :
+            print self.cur_mol.name
+        except :
+            status ( "Selected model not found; please choose another model" )
+            self.struc.set ("")
+            self.chain.set ("")
+            self.RemoveSeq ()
+            ok = False
+        
+        if not ok :
+            return
+            
 
         resolution = 3.0 * self.cur_dmap.data.step[0]
         sses = SSEs ( self.seqRes )
@@ -1802,7 +1823,16 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
                 if si < len ( self.seq ) :
                     res = self.seqRes [ si ]
                     resEnd = self.seqRes [ len(self.seqRes) - 1 ]
-                    status ( "Sequence: %s/%s %d/%d" % ( self.seq[si], res.type, res.id.position, resEnd.id.position ) )
+                    
+                    try :
+                        status ( "Sequence: %s/%s %d/%d" % ( self.seq[si], res.type, res.id.position, resEnd.id.position ) )
+                    except :
+                        status ( "model not found" )
+                        self.chain.set("")
+                        self.struc.set("")
+                        self.RemoveSeq ()
+                        return
+
                     y0 = self.seqY+5
                     y1 = self.seqY+self.seqH-5
                     if event.y >= y0 and event.y <= y1 and hasattr ( self, 'seqMouseR' ) :

@@ -221,10 +221,6 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             #b = Tkinter.Button(ff, text="SSE", command=self.SSE)
             #b.grid (column=9, row=0, sticky='w', padx=5)
 
-            b = Tkinter.Button(ff, text="Calculate Z-Scores", command=self.CalcZScores)
-            b.grid (column=10, row=0, sticky='w', padx=5)
-
-
             if 1 :
                 oft = Hybrid.Checkbutton(ff, 'Ribbon', True)
                 #oft.button.grid(column = 12, row = 0, sticky = 'w')
@@ -289,6 +285,9 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             ff.grid(column=0, row=row, sticky='w', pady=0, padx=5)
             
             
+            b = Tkinter.Button(ff, text="Calculate Z-Scores", command=self.CalcZScores)
+            b.grid (column=10, row=0, sticky='w', padx=5)
+
             self.colorMod = Tkinter.StringVar()
             self.colorMod.set ( 'sc' )
             
@@ -309,7 +308,7 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             ff = Tkinter.Frame(ff, borderwidth=1, padx=2, pady=2, relief=Tkinter.GROOVE)
             ff.grid(column=30, row=0, sticky='w', pady=0, padx=5)
 
-            l = Tkinter.Label(ff, text='   Selection (Ctrl+Click+Drag on Sequence) - Show:', fg="#000")
+            l = Tkinter.Label(ff, text='   To Select, Ctrl+Click+Drag on Sequence, Show:', fg="#000")
             l.grid(column=35, row=0, sticky='ens')
 
             oft = Hybrid.Checkbutton(ff, 'Ribbon', True)

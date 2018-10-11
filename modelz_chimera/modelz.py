@@ -168,7 +168,7 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             l.grid(column=0, row=0, sticky='w')
 
             self.dmap = Tkinter.StringVar(parent)
-            self.dmapMB  = Tkinter.Menubutton ( ff, textvariable=self.dmap, relief=Tkinter.RAISED, width=15 )
+            self.dmapMB  = Tkinter.Menubutton ( ff, textvariable=self.dmap, relief=Tkinter.RAISED, width=20 )
             self.dmapMB.grid (column=1, row=0, sticky='we', padx=5)
             self.dmapMB.menu  =  Tkinter.Menu ( self.dmapMB, tearoff=0, postcommand=self.MapMenu )
             self.dmapMB["menu"]  =  self.dmapMB.menu
@@ -181,7 +181,7 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             l.grid(column=2, row=0, sticky='w')
 
             self.struc = Tkinter.StringVar(parent)
-            self.strucMB  = Tkinter.Menubutton ( ff, textvariable=self.struc, relief=Tkinter.RAISED, width=15 )
+            self.strucMB  = Tkinter.Menubutton ( ff, textvariable=self.struc, relief=Tkinter.RAISED, width=20 )
             self.strucMB.grid (column=3, row=0, sticky='we', padx=5)
             self.strucMB.menu  =  Tkinter.Menu ( self.strucMB, tearoff=0, postcommand=self.StrucMenu )
             self.strucMB["menu"]  =  self.strucMB.menu
@@ -285,7 +285,7 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             ff.grid(column=0, row=row, sticky='w', pady=0, padx=5)
             
             
-            b = Tkinter.Button(ff, text="Calculate Z-Scores", command=self.CalcZScores)
+            b = Tkinter.Button(ff, text="Calculate Z-Scores", command=self.CalcZScores )
             b.grid (column=10, row=0, sticky='w', padx=5)
 
             self.colorMod = Tkinter.StringVar()
@@ -304,11 +304,14 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             c.grid (column=23, row=0, sticky='w')
 
 
+            l = Tkinter.Label(ff, text='     ', fg="#000")
+            l.grid(column=25, row=0, sticky='ens')
+
 
             ff = Tkinter.Frame(ff, borderwidth=1, padx=2, pady=2, relief=Tkinter.GROOVE)
-            ff.grid(column=30, row=0, sticky='w', pady=0, padx=5)
+            ff.grid(column=30, row=0, sticky='e', pady=0, padx=5)
 
-            l = Tkinter.Label(ff, text='   To Select, Ctrl+Click+Drag on Sequence, Show:', fg="#000")
+            l = Tkinter.Label(ff, text='   Select (Ctrl+Click+Drag On Sequence) Show:', fg="#000")
             l.grid(column=35, row=0, sticky='ens')
 
             oft = Hybrid.Checkbutton(ff, 'Ribbon', True)
@@ -321,7 +324,7 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             self.showAtoms = oft.variable
             #self.showRibbon.set ( 1 )
 
-            oft = Hybrid.Checkbutton(ff, 'Mesh', True)
+            oft = Hybrid.Checkbutton(ff, 'Mesh', False)
             oft.button.grid(column = 38, row = 0, sticky = 'w')
             self.showMesh = oft.variable
             #self.showRibbon.set ( 1 )
@@ -817,7 +820,6 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
 
 
 
-
     def RemoveSeq  (self) :
         
         if self.seq == "" :
@@ -853,6 +855,7 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
             del self.seqText
             
         self.seqSel = None
+        self.seq = ""
         self.UpdateSeqSel ()
 
 
@@ -948,6 +951,27 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
         scoreI = 0
 
         status ( "Getting secondary structure elements..." )
+
+        ok = True
+        try :
+            print self.cur_dmap.name
+        except :
+            status ( "Selected map not found; please choose another map" )
+            self.dmap.set ("")
+            ok = False
+            
+        try :
+            print self.cur_mol.name
+        except :
+            status ( "Selected model not found; please choose another model" )
+            self.struc.set ("")
+            self.chain.set ("")
+            self.RemoveSeq ()
+            ok = False
+        
+        if not ok :
+            return
+            
 
         resolution = 3.0 * self.cur_dmap.data.step[0]
         sses = SSEs ( self.seqRes )
@@ -1799,7 +1823,16 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ):
                 if si < len ( self.seq ) :
                     res = self.seqRes [ si ]
                     resEnd = self.seqRes [ len(self.seqRes) - 1 ]
-                    status ( "Sequence: %s/%s %d/%d" % ( self.seq[si], res.type, res.id.position, resEnd.id.position ) )
+                    
+                    try :
+                        status ( "Sequence: %s/%s %d/%d" % ( self.seq[si], res.type, res.id.position, resEnd.id.position ) )
+                    except :
+                        status ( "model not found" )
+                        self.chain.set("")
+                        self.struc.set("")
+                        self.RemoveSeq ()
+                        return
+
                     y0 = self.seqY+5
                     y1 = self.seqY+self.seqH-5
                     if event.y >= y0 and event.y <= y1 and hasattr ( self, 'seqMouseR' ) :

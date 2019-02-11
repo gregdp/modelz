@@ -14,6 +14,6 @@ To Install:
 To Run:
 1. (Re)start Chimera*
 2. Start ModelZ from Tools -> Volume Data
-3. See [Tutorial](https://vreeboard.com)
+3. See [Tutorial](http://github.com/gregdp/modelz/blob/master/tutorials/Tutorial-ModelZ.pdf)
 
 \* On Mac OS, an error message may be shown at first, see [here](https://www.santoshsrinivas.com/disable-gatekeeper-in-macos-sierra/) for solution.

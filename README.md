@@ -15,6 +15,6 @@ Note that on Windows, you may use the python bundled with Chimera itself, so the
 To Run:
 1. (Re)start Chimera*
 2. Start ModelZ: Tools -> Volume Data -> ModelZ
-3. See [Tutorial](https://github.com/gregdp/modelz/blob/master/tutorials/Tutorial-ModelZ.pdf)
+3. See [more details and tutorials](https://cryoem.slac.stanford.edu/ncmi/resources/software/modelz)
 
-\* On Mac OS, an error message may be shown at first, see [here](https://www.santoshsrinivas.com/disable-gatekeeper-in-macos-sierra/) for solution.
+\* On Mac OS, an error message may be shown on first run after installing, see [here](https://www.santoshsrinivas.com/disable-gatekeeper-in-macos-sierra/) for solution.

@@ -2,8 +2,8 @@
 
 To Install:
 
-1. Please note that <a href="https://www.cgl.ucsf.edu/chimera/">UCSF Chimera</a> is required to use ModelZ
-2. Download latest version of ModelZ from the <a href="https://github.com/gregdp/modelz/tree/master/download">download</a> folder
+1. First, <a href="https://www.cgl.ucsf.edu/chimera/download.html">download</a> and install UCSF Chimera.
+2. <a href="https://github.com/gregdp/modelz/tree/master/download">Download</a> latest version of ModelZ.
 3. In a terminal, navigate to where the file was downloaded, then execute the following commands:
 * unzip modelz_chimera_1_0.zip
 * cd modelz_chimera_1_0

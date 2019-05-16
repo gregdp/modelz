@@ -13,7 +13,7 @@ class ModelZ_Dialog_EMO ( EMO ):
   def categoryDescriptions(self):
     # since we want to use specialized descriptions for certain categories...
     return {
-      'Volume Data': 'Calculate Z-scores for map & model',
+      'Volume Data': 'Evaluate map & model',
     }
   def icon(self):
     return None #self.path('volseg.png')

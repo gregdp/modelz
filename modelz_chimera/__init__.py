@@ -1,1 +1,1 @@
-modelzVersion = '1.0'
+modelzVersion = '1.2'

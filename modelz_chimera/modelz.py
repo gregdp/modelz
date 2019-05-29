@@ -4813,16 +4813,28 @@ def Calc_ ( label="" ) :
     print "Calc Q scores:", label
 
     from VolumeViewer import Volume
-    dmap = chimera.openModels.list(modelTypes = [Volume])[0]
-    #print " - density map: %s" % dmap.name
+    vols = chimera.openModels.list(modelTypes = [Volume])
+    if len(vols) == 0 :
+        print " - no volumes loaded"
+        print ""
+        return
+    dmap = vols[0]
+    print " - dmap: %s" % dmap.name
 
     #fp = open ( "/Users/greg/_data/_mapsq/scores.txt", "a" )
     #fp.write ( "%s...\n" % dmap.name.split("_")[0]  )
     #fp.close ()
 
     from chimera import Molecule
-    mol = chimera.openModels.list(modelTypes = [Molecule])[0]
-    #print " - model: %s" % mol.name
+    mols = chimera.openModels.list(modelTypes = [Molecule])
+    if len(mols) == 0 :
+        print " - no molecules loaded"
+        print ""
+        return
+    mol = mols[0]
+    print " - mol: %s" % mol.name
+
+
     SetBBAts ( mol )
 
     ats = [at for at in mol.atoms if not at.element.name == "H"]

@@ -4810,11 +4810,11 @@ import threading
 
 def Calc_ ( label="" ) :
 
-    print "Calc all scores -", label
+    print "Calc Q scores:", label
 
     from VolumeViewer import Volume
     dmap = chimera.openModels.list(modelTypes = [Volume])[0]
-    print " - dmap: %s" % dmap.name
+    #print " - density map: %s" % dmap.name
 
     #fp = open ( "/Users/greg/_data/_mapsq/scores.txt", "a" )
     #fp.write ( "%s...\n" % dmap.name.split("_")[0]  )
@@ -4822,12 +4822,12 @@ def Calc_ ( label="" ) :
 
     from chimera import Molecule
     mol = chimera.openModels.list(modelTypes = [Molecule])[0]
-    print " - mol: %s" % mol.name
+    #print " - model: %s" % mol.name
     SetBBAts ( mol )
 
     ats = [at for at in mol.atoms if not at.element.name == "H"]
     points = _multiscale.get_atom_coordinates ( ats, transformed = False )
-    print " - search tree: %d/%d ats" % ( len(ats), len(mol.atoms) )
+    #print " - search tree: %d/%d ats" % ( len(ats), len(mol.atoms) )
     #allAtTree = AdaptiveTree ( points.tolist(), ats, 1.0)
     allAtTree = None
 
@@ -4839,7 +4839,7 @@ def Calc_ ( label="" ) :
         #cc, ccm, dr, ccr, ccmr = CalcSCBBr ( mol, mol.residues[0].id.chainId, dmap )
         cc, ccm, dr, ccr, ccmr = CalcSCBBr ( mol, None, dmap )
 
-    if 0 :
+    if 1 :
         #bbSig, scSig = CalcSigma ( mol, mol.residues[0].id.chainId, dmap, allAtTree, useOld=False, log=False )
         #bbRadZ, scRadZ = CalcRadZ ( mol, mol.residues[0].id.chainId, dmap, allAtTree, useOld=False, log=False )
 
@@ -4847,6 +4847,9 @@ def Calc_ ( label="" ) :
 
         #q, qcc = CalcQ ( mol, None, dmap, allAtTree=allAtTree )
         q, qcc = CalcQp ( mol, None, dmap, allAtTree=allAtTree )
+        
+        
+        
 
     if 0 :
         bbRadZ, scRadZ = CalcRadZ ( mol, None, dmap, allAtTree, useOld=False, log=False )
@@ -4856,7 +4859,7 @@ def Calc_ ( label="" ) :
         Zs = CalcRotaZ ( dmap, mol, mol.residues )
         scRotaZ = numpy.average ( Zs )
 
-    if 1 :
+    if 0 :
         emr = emringer (dmap, mol)
 
     if 0 :
@@ -5598,7 +5601,7 @@ def CalcQp ( mol, cid, dmap, sigma=0.5, allAtTree=None, useOld=True, log=False )
     M = dmap.data.full_matrix()
     minD, maxD = numpy.min(M), numpy.max(M)
 
-    print "Q Scores - p - %d" % numProc
+    print "Q Scores - using %d processors" % numProc
     print " - map: %s" % dmap.name
     print " - mol: %s, chain: %s" % (mol.name, cid if cid != None else "_all_")
     print " - sigma: %.2f" % sigma
@@ -5624,40 +5627,43 @@ def CalcQp ( mol, cid, dmap, sigma=0.5, allAtTree=None, useOld=True, log=False )
     mapPath = os.path.split ( dmap.data.path )[0]
     mapBase = os.path.splitext (dmap.data.path)[0]
 
-    print "Ran:"
-    print sys.argv
+    if 0 :
+        print "Ran:"
+        print sys.argv
     # '/Users/greg/_mol/Chimera.app/Contents/Resources/share/__main__.py'
     chiPath = os.path.split ( sys.argv[0] )[0]
     mapQPPath = os.path.join ( chiPath, 'Segger' )
     mapQPPath = os.path.join ( chiPath, 'mapqp.py' )
-    print " -- ", mapQPPath
+    print " - path:", mapQPPath
 
     # for Mac
     chiPath, share = os.path.split ( chiPath )
-    print chiPath, share
+    #print chiPath, share
     chiPath2, resOrChim = os.path.split ( chiPath )
-    print chiPath, resOrChim
+    #print chiPath, resOrChim
     if resOrChim == "Chimera" :
-        print " -- on unix"
+        print " - on unix"
         chiPath = os.path.join ( chiPath, 'bin' )
         chiPath = os.path.join ( chiPath, 'chimera' )
     else :
-        print " -- on mac"
+        print " - on mac"
         #chiPath2, contents = os.path.split ( chiPath2 )
         #print chiPath2, contents
         chiPath = os.path.join ( chiPath2, 'MacOS' )
         chiPath = os.path.join ( chiPath, 'chimera' )
 
-    print " -- chiPath: ", chiPath
+    #print " -- chiPath: ", chiPath
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
     inDir = os.path.split(dir_path)[0]
-    print "Working dir: ", inDir
-    mapQPPath = os.path.join ( inDir, 'Segger' )
+    #print " - dir: ", inDir
+    mapQPPath = os.path.join ( inDir, 'modelz' )
     mapQPPath = os.path.join ( mapQPPath, 'mapqp.py' )
-    print " -- ", mapQPPath
 
     mapBase = mapBase + "_qscore_2019_proc"
+    
+    print ""
+    print "Starting parallel processes..."
 
     n = len(atoms)
     g = [atoms[(n*c)/numProc:(n*(c+1))/numProc] for c in range(numProc)]
@@ -5693,7 +5699,7 @@ def CalcQp ( mol, cid, dmap, sigma=0.5, allAtTree=None, useOld=True, log=False )
         procs.append ( [mi, p, fout, foute] )
 
     print ""
-    print "Waiting...",
+    print "Waiting..."
     for mi, p, fout, foute in procs :
         p.wait()
         fout.close()
@@ -5709,7 +5715,7 @@ def CalcQp ( mol, cid, dmap, sigma=0.5, allAtTree=None, useOld=True, log=False )
             atids["%d.%s.%s.%s" % (r.id.position,r.id.chainId,at.name,altLoc)] = at
 
     print ""
-    print "Getting...",
+    print "Getting..."
     for mi, p, fout, foute in procs :
         fin = mapBase + "_%d_out.txt" % mi
         #print " - getting from: ", fin
@@ -5721,7 +5727,7 @@ def CalcQp ( mol, cid, dmap, sigma=0.5, allAtTree=None, useOld=True, log=False )
             #at = r.atomsMap[atName][0]
             at.Q = float(ccm)
             at.CC = float(cc)
-            at.occupancy = at.Q
+            at.bfactor = at.Q
 
         #print " - removing..."
         os.remove ( mapBase + "_%d_out.txt" % mi )
@@ -5742,6 +5748,17 @@ def CalcQp ( mol, cid, dmap, sigma=0.5, allAtTree=None, useOld=True, log=False )
     totMin = numpy.floor ( totSec / 60.0 )
     totSec = totSec - totMin * 60.0
     print " - done, time: %.0f min, %.1f sec" % ( totMin, totSec )
+
+
+    molPath = os.path.splitext(mol.openedAs[0])[0]
+    mapName = os.path.splitext(dmap.name)[0]
+
+    nname = molPath + "__Q__" + mapName + ".pdb"
+    print ""
+    print "Saving pdb with Q-scores in B-factor column:"
+    print " - ", nname
+    chimera.PDBio().writePDBfile ( [mol], nname )
+
 
     for r in ress :
         CalcResQ (r, dmap, sigma, useOld=True )
@@ -5765,12 +5782,32 @@ def CalcQp ( mol, cid, dmap, sigma=0.5, allAtTree=None, useOld=True, log=False )
     #scSC = [1.0/x for x in scoresSC if x is not None]
     #scBB = [1.0/x for x in scoresBB if x is not None]
 
-    print " - residue    Q min %.3f max %.3f, avg %.3f" % (min(scores), max(scores), numpy.average(scores))
-    print " - backbone   Q min %.3f max %.3f, avg %.3f" % (min(scoresBB), max(scoresBB), numpy.average(scoresBB))
-    print " - side chain Q min %.3f max %.3f, avg %.3f" % (min(scoresSC), max(scoresSC), numpy.average(scoresSC))
+    #print " - residue    Q min %.3f max %.3f, avg %.3f" % (min(scores), max(scores), numpy.average(scores))
+    #print " - backbone   Q min %.3f max %.3f, avg %.3f" % (min(scoresBB), max(scoresBB), numpy.average(scoresBB))
+    #print " - side chain Q min %.3f max %.3f, avg %.3f" % (min(scoresSC), max(scoresSC), numpy.average(scoresSC))
 
-    print " - atom Q  min %.3f max %.3f, avg %.3f" % (min(scoresQ), max(scoresQ), numpy.average(scoresQ))
-    print " - atom CC min %.3f max %.3f, avg %.3f" % (min(scoresCC), max(scoresCC), numpy.average(scoresCC))
+    #print " - atom Q  min %.3f max %.3f, avg %.3f" % (min(scoresQ), max(scoresQ), numpy.average(scoresQ))
+    #print " - atom CC min %.3f max %.3f, avg %.3f" % (min(scoresCC), max(scoresCC), numpy.average(scoresCC))
+
+
+    totQ, totN = 0.0, 0.0
+    QT, QN = { "Protein":0.0, "Nucleic":0.0, "Other":0.0 }, { "Protein":0.0, "Nucleic":0.0, "Other":0.0}
+
+    for r in mol.residues :
+        for at in r.atoms :
+            totQ += at.Q; totN += 1.0
+            tp = "Other"
+            if at.residue.isProt : tp = "Protein"
+            if at.residue.isNA : tp = "Nucleic"
+            QT[tp] += at.Q; QN[tp] += 1.0
+
+    print ""
+    print "Average atom Q-score for entire model: %.5f" % (totQ/totN)
+    for tp in ["Protein", "Nucleic", "Other"] :
+        if QN[tp] > 0 :
+            print " - %s: %.5f" % (tp, QT[tp]/QN[tp])
+            
+    print ""
 
 
     return numpy.average(scoresQ), numpy.average(scoresCC)

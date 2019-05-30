@@ -4855,10 +4855,10 @@ def Calc_ ( label="" ) :
         #bbSig, scSig = CalcSigma ( mol, mol.residues[0].id.chainId, dmap, allAtTree, useOld=False, log=False )
         #bbRadZ, scRadZ = CalcRadZ ( mol, mol.residues[0].id.chainId, dmap, allAtTree, useOld=False, log=False )
 
-        #q, qcc = CalcQ ( mol, mol.residues[0].id.chainId, dmap, allAtTree=allAtTree )
+        q, qcc = CalcQ ( mol, None, dmap, allAtTree=allAtTree )
 
         #q, qcc = CalcQ ( mol, None, dmap, allAtTree=allAtTree )
-        q, qcc = CalcQp ( mol, None, dmap, allAtTree=allAtTree )
+        #q, qcc = CalcQp ( mol, None, dmap, allAtTree=allAtTree )
         
         
         
@@ -5420,12 +5420,23 @@ def CalcQ_ ( mol, cid, dmap, sigma=0.5, allAtTree=None, useOld=False, log=False 
 
 def CalcQ ( mol, cid, dmap, sigma=0.5, allAtTree=None, useOld=False, log=False ) :
 
-    print "Q Scores"
+    M = dmap.data.full_matrix()
+    minD, maxD = numpy.min(M), numpy.max(M)
+
+    print "Q Scores - "
     print " - map: %s" % dmap.name
     print " - mol: %s, chain: %s" % (mol.name, cid if cid != None else "_all_")
+    print " - sigma: %.2f" % sigma
+    print " - mind: %.3f, maxd: %.3f" % (minD, maxD)
 
     import time
     start = time.time()
+
+
+    ats = [at for at in mol.atoms if not at.element.name == "H"]
+    points = _multiscale.get_atom_coordinates ( ats, transformed = False )
+    print " - search tree: %d/%d ats" % ( len(ats), len(mol.atoms) )
+    allAtTree = AdaptiveTree ( points.tolist(), ats, 1.0)
 
 
     ress = []
@@ -5437,97 +5448,59 @@ def CalcQ ( mol, cid, dmap, sigma=0.5, allAtTree=None, useOld=False, log=False )
 
     for ri, r in enumerate ( ress ) :
 
-        CalcResQ (r, dmap, sigma, allAtTree=allAtTree, numPts=2, toRAD=2.0, dRAD=0.5, useOld=useOld)
+        for at in r.atoms :
+            at.CC, at.Q = RadCC ( [at], dmap, sigma, allAtTree=allAtTree, show=0, log=0, numPts=8, toRAD=2.0, dRAD=0.1, minD=minD, maxD=maxD )
+            #print at.residue.id.position, at.residue.type, at.name, at.Q
 
         if (ri+1) % 10 == 0 :
-            if log : status ( "Calculating Q scores - res %d/%d" % (ri+1, len(ress)) )
-            print ".",
+            print "%d/%d" % (ri,len(ress))
 
-
-    scores, scoresBB, scoresSC, scoresQ, scoresCC = [], [], [], [], []
-
-    ress = []
-    for r in mol.residues :
-        if cid == None or r.id.chainId == cid :
-            ress.append ( r )
-            scores.append ( r.Q )
-            if r.bbQ != None : scoresBB.append ( r.bbQ )
-            if r.scQ != None : scoresSC.append ( r.scQ )
-            for at in r.atoms :
-                scoresQ.append ( at.Q )
-                scoresCC.append ( at.CC )
-
-    #sc = [x for x in scores if x is not None]
-    #scSC = [1.0/x for x in scoresSC if x is not None]
-    #scBB = [1.0/x for x in scoresBB if x is not None]
 
     end = time.time()
     print ""
-    print " - done, time: %f" % ( end-start )
+    #print " - done, time: %f" % ( end-start )
     totSec = end - start
     totMin = numpy.floor ( totSec / 60.0 )
     totSec = totSec - totMin * 60.0
     print " - done, time: %.0f min, %.1f sec" % ( totMin, totSec )
 
-    print " - residue    Q min %.3f max %.3f, avg %.3f" % (min(scores), max(scores), numpy.average(scores))
-    print " - backbone   Q min %.3f max %.3f, avg %.3f" % (min(scoresBB), max(scoresBB), numpy.average(scoresBB))
-    print " - side chain Q min %.3f max %.3f, avg %.3f" % (min(scoresSC), max(scoresSC), numpy.average(scoresSC))
-
-    print " - atom Q  min %.3f max %.3f, avg %.3f" % (min(scoresQ), max(scoresQ), numpy.average(scoresQ))
-    print " - atom CC min %.3f max %.3f, avg %.3f" % (min(scoresCC), max(scoresCC), numpy.average(scoresCC))
 
 
 
-    if 0 :
+    molPath = os.path.splitext(mol.openedAs[0])[0]
+    mapName = os.path.splitext(dmap.name)[0]
 
-        sByType = {}
-        rByType = {}
-        for r in ress :
-            if r.scZ != None :
-                if not r.type in sByType :
-                    rByType[r.type] = []
-                    sByType[r.type] = []
-                rByType[r.type].append ( [r.scZ, r] )
-                sByType[r.type].append ( [r.scZ] )
-
-        avgs = []
-        for rtype, ra in sByType.iteritems () :
-            avgs.append ( [numpy.average (ra), rtype] )
-
-        from chimera.resCode import protein3to1
-        from chimera.resCode import nucleic3to1
-        avgs.sort ( reverse=True, key=lambda x: x[0] )
+    nname = molPath + "__Q__" + mapName + ".pdb"
+    print ""
+    print "Saving pdb with Q-scores in B-factor column:"
+    print " - ", nname
+    chimera.PDBio().writePDBfile ( [mol], nname )
 
 
-        mapName = os.path.splitext(dmap.name)[0]
-        molName = os.path.splitext(mol.name)[0]
-        mdir, mpfile = os.path.split(dmap.data.path)
-        foname = mdir + "/" + mapName + "__" + molName + ".txt"
+
+    totQ, totCC, totN = 0.0, 0.0, 0.0
+    QT, QN = { "Protein":0.0, "Nucleic":0.0, "Other":0.0 }, { "Protein":0.0, "Nucleic":0.0, "Other":0.0}
+
+    for ri, r in enumerate ( ress ) :
+        for at in r.atoms :
+            totQ += at.Q; totN += 1.0; totCC += at.CC
+            tp = "Other"
+            if at.residue.isProt : tp = "Protein"
+            if at.residue.isNA : tp = "Nucleic"
+            QT[tp] += at.Q; QN[tp] += 1.0
+
+    print ""
+    print "Average atom Q-score for entire model: %.5f" % (totQ/totN)
+    for tp in ["Protein", "Nucleic", "Other"] :
+        if QN[tp] > 0 :
+            print " - %s: %.5f" % (tp, QT[tp]/QN[tp])
+            
+    print ""
 
 
-        print " - scores to: " + foname
-        fp = open (foname,"w")
-
-        for avgScore, rtype in avgs :
-
-            rscores = rByType[rtype]
-            rscores.sort ( reverse=False, key=lambda x: x[0] )
-            hr = rscores[0]
-            R = hr[1]
-            highestScore = hr[0]
-            numRes = len(rscores)
-
-            rts = ""
-            if R.isProt : rts = protein3to1[rtype]
-            else : rts = nucleic3to1[rtype]
-
-            print "%s\t%s\t%d\t%f\t%d\t.%s\t%f" % (rtype, rts, numRes, avgScore, R.id.position, R.id.chainId, highestScore)
-            fp.write ( "%s\t%s\t%d\t%f\t%d\t.%s\t%f\n" % (rtype, rts, numRes, avgScore, R.id.position, R.id.chainId, highestScore) )
-
-        fp.close()
 
 
-    return numpy.average(scoresQ), numpy.average(scoresCC)
+    return totQ/totN, totCC/totN
 
 
 

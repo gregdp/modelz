@@ -3280,7 +3280,7 @@ class ModelZ_Dialog ( chimera.baseDialog.ModelessDialog ) :
             points = get_atom_coordinates ( atoms, transformed = True )
             COM, U, S, V = prAxes ( points )
 
-            moveCam = 0
+            moveCam = 1
             if moveCam :
                 p0 = numpy.array ( chimera.viewer.camera.center )
                 p1 = numpy.array ( [ COM[0], COM[1], COM[2] ] )
@@ -4847,7 +4847,6 @@ def Calc_ ( label="" ) :
     cc, ccm, dr, bbRadZ, scRadZ, scRotaZ, q, qcc, emr = 0,0,0,0,0,0,0,0,0
 
     if 0 :
-
         #cc, ccm, dr, ccr, ccmr = CalcSCBBr ( mol, mol.residues[0].id.chainId, dmap )
         cc, ccm, dr, ccr, ccmr = CalcSCBBr ( mol, None, dmap )
 
@@ -4859,9 +4858,7 @@ def Calc_ ( label="" ) :
 
         #q, qcc = CalcQ ( mol, None, dmap, allAtTree=allAtTree )
         #q, qcc = CalcQp ( mol, None, dmap, allAtTree=allAtTree )
-        
-        
-        
+
 
     if 0 :
         bbRadZ, scRadZ = CalcRadZ ( mol, None, dmap, allAtTree, useOld=False, log=False )

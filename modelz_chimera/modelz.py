@@ -60,13 +60,13 @@ devMenu = True
 isModelZ = True
 
 dlgName = "mapqdlg"
-dlgTitle = "MapQ (v1.2)"
+dlgTitle = "MapQ (v1.3)"
 dlgHelp = 'https://cryoem.slac.stanford.edu/ncmi/resources/software/mapq'
 
 if isModelZ :
     devMenu = False
     dlgName = "modelzdlg"
-    dlgTitle = "ModelZ (v1.2)"
+    dlgTitle = "ModelZ (v1.3)"
     dlgHelp = 'https://cryoem.slac.stanford.edu/ncmi/resources/software/modelz'
 
 
@@ -5448,6 +5448,7 @@ def CalcQ ( mol, cid, dmap, sigma=0.5, allAtTree=None, useOld=False, log=False )
         for at in r.atoms :
             at.CC, at.Q = RadCC ( [at], dmap, sigma, allAtTree=allAtTree, show=0, log=0, numPts=8, toRAD=2.0, dRAD=0.1, minD=minD, maxD=maxD )
             #print at.residue.id.position, at.residue.type, at.name, at.Q
+            at.bfactor = at.Q
 
         if (ri+1) % 10 == 0 :
             print "%d/%d" % (ri,len(ress))
